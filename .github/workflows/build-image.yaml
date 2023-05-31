@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        docker_build_arch: [ linux/arm64 , linux/amd64 ]
+        docker_build_arch: [ linux/arm64 ]
     steps:
       # Get the repository's code
       - name: Checkout
@@ -56,11 +56,6 @@ jobs:
         uses: docker/setup-qemu-action@v2
         with:
           platforms: arm64
-      - name: Set up QEMU (x64)
-        if: runner.arch != 'x64'
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: amd64
 
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
