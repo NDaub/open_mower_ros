@@ -311,7 +311,7 @@ void goReverse() {
     reverse.angular.z = 0;
     reverse.linear.x = -1;
     cmd_vel_pub.publish(reverse);
-
+}
 /// @brief If the BLADE motor is currently enabled, we stop it
 void stopBlade()
 {
