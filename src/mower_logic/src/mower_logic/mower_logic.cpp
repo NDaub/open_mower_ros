@@ -304,6 +304,15 @@ void stopMoving() {
     cmd_vel_pub.publish(stop);
 }
 
+/// @brief put bot in reverse
+void goReverse() {
+   // ROS_INFO_STREAM("om_mower_logic: goReverse() - put bot in reverse");
+    geometry_msgs::Twist reverse;
+    reverse.angular.z = 0;
+    reverse.linear.x = -1;
+    cmd_vel_pub.publish(reverse);
+}
+
 /// @brief If the BLADE motor is currently enabled, we stop it
 void stopBlade()
 {
