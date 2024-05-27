@@ -22,6 +22,7 @@ extern xbot_msgs::AbsolutePose getPose();
 extern mower_msgs::Status getStatus();
 
 extern void setRobotPose(geometry_msgs::Pose &pose);
+extern void goReverse();
 extern void stopMoving();
 extern bool isGpsGood();
 extern bool setGPS(bool enabled);
@@ -34,48 +35,15 @@ std::string UndockingBehavior::state_name() {
 }
 
 Behavior *UndockingBehavior::execute() {
+    goReverse();
 
-    // get robot's current pose from odometry.
-    xbot_msgs::AbsolutePose pose = getPose();
-    tf2::Quaternion quat;
-    tf2::fromMsg(pose.pose.pose.orientation, quat);
-    tf2::Matrix3x3 m(quat);
-    double roll, pitch, yaw;
-    m.getRPY(roll, pitch, yaw);
-
-
-    mbf_msgs::ExePathGoal exePathGoal;
-
-    nav_msgs::Path path;
-
-
-    int undock_point_count = config.undock_distance * 10.0;
-    for (int i = 0; i < undock_point_count; i++) {
-        geometry_msgs::PoseStamped docking_pose_stamped_front;
-        docking_pose_stamped_front.pose = pose.pose.pose;
-        docking_pose_stamped_front.header = pose.header;
-        docking_pose_stamped_front.pose.position.x -= cos(yaw) * (i / 10.0);
-        docking_pose_stamped_front.pose.position.y -= sin(yaw) * (i / 10.0);
-        path.poses.push_back(docking_pose_stamped_front);
-    }
-
-    exePathGoal.path = path;
-    exePathGoal.angle_tolerance = 1.0 * (M_PI / 180.0);
-    exePathGoal.dist_tolerance = 0.1;
-    exePathGoal.tolerance_from_action = true;
-    exePathGoal.controller = "DockingFTCPlanner";
-
-    auto result = mbfClientExePath->sendGoalAndWait(exePathGoal);
-
-    bool success = result.state_ == actionlib::SimpleClientGoalState::SUCCEEDED;
-
-    // stop the bot for now
+    ros::Rate reverseTimer(2);
+    reverseTimer.sleep();
+    goReverse();
+    reverseTimer.sleep();
+    goReverse();
+    reverseTimer.sleep();
     stopMoving();
-
-    if (!success) {
-        ROS_ERROR_STREAM("Error during undock");
-        return &IdleBehavior::INSTANCE;
-    }
 
 
     ROS_INFO_STREAM("Undock success. Waiting for GPS.");
